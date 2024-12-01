@@ -24,6 +24,7 @@ func partOne() {
 
 	// assuming the lists are the same size
 	for index, element := range input["setOne"] {
+
 		// extract the same index from the second set of data points
 		setTwoPair := input["setTwo"][index]
 
