@@ -1,0 +1,168 @@
+// TRIED HANDLING ALL CASES, I'M SURE IT'S POSSIBLE, IT WAS JUST TEDIOUS SO LEFT IT.
+
+type PartTwoArrayNode struct {
+	Repeated bool
+	Report   []int
+}
+
+type PartTwoResultsNode struct {
+	SafeNumber      int
+	RepeatedReports []PartTwoArrayNode
+}
+
+/*
+*
+
+	This literally just filters out the error entry. I'm sure there's a built in or more efficient way to do this but I'll look it up later.
+*/
+func createRepeatedNode(report PartTwoArrayNode, indexToRemove int) PartTwoArrayNode {
+	var newNode PartTwoArrayNode
+	newNode.Repeated = true
+	// filter out
+	for index, element := range report.Report {
+		if index != indexToRemove {
+			newNode.Report = append(newNode.Report, element)
+		}
+	}
+	return newNode
+}
+
+func findNumSafeReports(reports []PartTwoArrayNode) PartTwoResultsNode {
+	safeReports := 0
+
+	var repeatedReports []PartTwoArrayNode
+
+	for _, report := range reports {
+		var ascending bool
+
+		numErrors := 0
+		errorIndex := -1
+
+		for index, element := range report.Report {
+			// only check for n-1 report elements
+			if index < (len(report.Report) - 1) {
+
+				nextElement := report.Report[index+1]
+				signedDifference := nextElement - element
+				difference := math.Abs(float64(signedDifference))
+
+				// check for > 3 && == 0 changes in elements
+				if (difference > 3 || difference == 0) && errorIndex != index {
+					// exit if numErrors is 1 (2 errors total)
+					if numErrors > 0 {
+						break
+					}
+
+					// if the index is 0, then there is a chance we can just remove the 0th index
+					if index == 0 {
+						if len(report.Report) > 2 {
+							zeroDiff := math.Abs(float64(report.Report[index+2] - report.Report[index]))
+							if zeroDiff > 3 || zeroDiff == 0 {
+								errorIndex = 0
+								numErrors++
+							} else {
+								errorIndex = 1
+							}
+						} else {
+							break
+						}
+					} else {
+						prevDiff := math.Abs(float64(nextElement - report.Report[index-1]))
+
+						// error moving from previous node to new node? two errors in a row already, break.
+						if prevDiff > 3 || prevDiff == 0 {
+							break
+						} else {
+							// no error? we can remove this current node and continue
+							numErrors++
+							errorIndex = index
+						}
+					}
+				}
+
+				// check for change in direction
+				if index == 0 {
+					ascending = true
+					if signedDifference < 0 {
+						ascending = false
+					}
+				} else {
+					// case where prior ascending, but currently descending
+					if ((ascending && signedDifference < 0) || (!ascending && signedDifference > 0)) && errorIndex != index {
+						// if index is 1, then the case can be that actually the 0th or 1st index is causing the error, handle this case
+						if index == 1 {
+							newSignedDifference := nextElement - report.Report[0]
+
+							// if there are two direction errors in a row, then maybe index 1 is an outlier
+							// if so mark it as such
+							if (newSignedDifference > 0 && !ascending) || (newSignedDifference < 0 && ascending) {
+								ascending = !ascending
+								numErrors++
+								errorIndex = 1
+							}
+						} else {
+							if numErrors > 0 {
+								break
+							} else {
+								newSignedDifference := nextElement - report.Report[index-1]
+								if (ascending && newSignedDifference < 0) || (!ascending && newSignedDifference > 0) {
+									break
+								} else {
+									numErrors++
+									errorIndex = index
+								}
+							}
+
+						}
+
+					}
+				}
+				// last index reached? this must be a safe report.
+			} else {
+
+				safeReports++
+			}
+		}
+	}
+
+	var toReturn PartTwoResultsNode
+
+	toReturn.SafeNumber = safeReports
+	toReturn.RepeatedReports = repeatedReports
+
+	return toReturn
+
+}
+
+func partTwo(reports []PartTwoArrayNode) {
+	fmt.Println("Part two answer: ")
+
+	safeReports := 0
+	// calculate essentially part one
+	initialResults := findNumSafeReports(reports)
+
+	safeReports += initialResults.SafeNumber // accumulate the number of safe reports
+
+	fmt.Println("Safe Reports: ")
+	fmt.Println(safeReports)
+}
+
+/*
+*
+
+	Takes our reports 2D array and creates an array containing a report and a repeated boolean.
+*/
+func addRepeatedMapping(reports [][]int) []PartTwoArrayNode {
+	var newReports []PartTwoArrayNode
+
+	for _, report := range reports {
+		arrNode := PartTwoArrayNode{
+			Report:   report,
+			Repeated: false,
+		}
+
+		newReports = append(newReports, arrNode)
+	}
+
+	return newReports
+}
