@@ -2,7 +2,9 @@ package main
 
 /*
 *
-	Is there a more efficient way to do this? Almost definitely. But I had a busy day. big O(width*height) for both answers
+	Is there a more efficient way to do this? Almost definitely. But I had a busy day. big O(width*height) for both answers.
+
+	(tried to save a bit of time on part two because I've had a busy day but holy moly is chatGPT awful at coding)
 */
 
 import (
