@@ -86,7 +86,7 @@ func partTwo(data [][]string) {
 				bottomRightRow := rowIndex + 1
 				bottomRightCol := colIndex + 1
 
-				// check back diagonal
+				// check back diagonal then check forward diagonal, if both exist in some form, increment as X shaped MAS has been found
 				if lib.BackDiagonalMas(topLeftRow, topLeftCol, bottomRightRow, bottomRightCol, data) && lib.ForeDiagonalMas(topRightRow, topRightCol, bottomLeftRow, bottomLeftCol, data) {
 					totalMAS++
 				}
